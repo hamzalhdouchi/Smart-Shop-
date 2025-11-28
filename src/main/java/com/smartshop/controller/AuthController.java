@@ -1,6 +1,6 @@
 package com.smartshop.controller;
 
-import com.smartshop.apiResponse.ApiResponseDTO;
+import com.smartshop.apiResponse.ApiResponse;
 import com.smartshop.dto.requist.createRequistDto.LoginRequestDTO;
 import com.smartshop.dto.response.UserResponseDTO;
 import com.smartshop.service.UserService;
@@ -21,7 +21,7 @@ public class AuthController {
     private final HttpServletRequest request;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponseDTO<UserResponseDTO>> login(
+    public ResponseEntity<ApiResponse<UserResponseDTO>> login(
             @Valid @RequestBody LoginRequestDTO loginRequest,
             HttpSession session) {
 
@@ -32,7 +32,7 @@ public class AuthController {
         );
 
 
-        ApiResponseDTO<UserResponseDTO> response = ApiResponseDTO.success(
+        ApiResponse<UserResponseDTO> response = ApiResponse.success(
                 user,
                 "Login successful"
         );
@@ -42,23 +42,23 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponseDTO<Void>> logout(HttpSession session) {
+    public ResponseEntity<ApiResponse<Void>> logout(HttpSession session) {
 
         userService.logout(session);
 
-        ApiResponseDTO<Void> response = ApiResponseDTO.success("Logout successful");
+        ApiResponse<Void> response = ApiResponse.success("Logout successful");
         response.setPath(request.getRequestURI());
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/session")
-    public ResponseEntity<ApiResponseDTO<UserResponseDTO>> getSessionInfo(HttpSession session) {
+    public ResponseEntity<ApiResponse<UserResponseDTO>> getSessionInfo(HttpSession session) {
 
         String userId = (String) session.getAttribute("USER_ID");
 
         if (userId == null) {
-            ApiResponseDTO<UserResponseDTO> response = ApiResponseDTO.error("No active session");
+            ApiResponse<UserResponseDTO> response = ApiResponse.error("No active session");
             response.setPath(request.getRequestURI());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
@@ -69,7 +69,7 @@ public class AuthController {
         // ✅ CORRECTION: appelez getUserById
         UserResponseDTO user = userService.getUserById(userId);
 
-        ApiResponseDTO<UserResponseDTO> response = ApiResponseDTO.success(
+        ApiResponse<UserResponseDTO> response = ApiResponse.success(
                 user,
                 "Session information retrieved"
         );
