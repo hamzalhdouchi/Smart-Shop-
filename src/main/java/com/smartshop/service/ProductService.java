@@ -20,6 +20,8 @@ public interface ProductService {
 
     Page<ProductResponseDTO> getAll(Pageable pageable);
 
+    Page<ProductResponseDTO> getProductsDeleted(Boolean deleted,Pageable pageable);
+
     Page<ProductAdvancedResponseDTO> getAllAdvanced(Pageable pageable);
 
     Page<ProductAdvancedResponseDTO> getAllInStock(Pageable pageable);
@@ -27,6 +29,8 @@ public interface ProductService {
     Page<ProductAdvancedResponseDTO> getAllOutOfStock(Pageable pageable);
 
     ProductAdvancedResponseDTO update(String id, UpdateProductDTO dto);
+
+    List<ProductResponseDTO> searchProducts(String keyword);
 
     void delete(String id);
 }
