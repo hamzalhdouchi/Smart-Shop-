@@ -14,15 +14,16 @@ import java.math.BigDecimal;
 @Builder
 public class OrderItem extends Auditable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @EmbeddedId
+    private OrderItemId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("orderId")
     @JoinColumn(name = "commande_id", nullable = false)
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("produitId")
     @JoinColumn(name = "produit_id", nullable = false)
     private Product produit;
 
