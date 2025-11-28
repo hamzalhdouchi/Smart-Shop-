@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -16,12 +17,20 @@ public interface ProductRepository extends JpaRepository<Product, String> {
 
     Optional<Product> findByNom(String nom);
 
-    List<Product> findByStockDisponibleGreaterThan(BigDecimal stock);
-
     @Query("SELECT p FROM Product p WHERE p.stockDisponible > 0")
     Page<Product> findAllInStock(Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE p.stockDisponible = 0 OR p.stockDisponible IS NULL")
     Page<Product> findAllOutOfStock(Pageable pageable);
+
+    Page<Product> findByDeleted(Boolean deleted,Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE " +
+            "(LOWER(p.nom) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "CAST(p.prix_unitair AS string) LIKE CONCAT('%', :keyword, '%') OR " +
+            "CAST(p.stockDisponible AS string) LIKE CONCAT('%', :keyword, '%')) AND " +
+            "p.deleted = false")
+    List<Product> searchByKeywordInAllFields(@Param("keyword") String keyword);
+
 }
 
