@@ -26,6 +26,6 @@ public class CreateProductDTO {
     @DecimalMin(value = "0", message = "Stock must be 0 or greater")
     @Digits(integer = 10, fraction = 2, message = "Stock must have maximum 10 integer digits and 2 decimal digits")
     @Builder.Default
-    private BigDecimal stockDisponible = BigDecimal.ZERO;
+    private Integer stockDisponible = 0;
 }
 
