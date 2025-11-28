@@ -15,8 +15,6 @@ import java.util.List;
 public interface ProductMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "prix_unitair", source = "prixUnitaire")
     @Mapping(target = "stockDisponible", source = "stockDisponible")
     Product toEntity(CreateProductDTO dto);
@@ -37,14 +35,14 @@ public interface ProductMapper {
 
     default boolean isInStock(Product product) {
         return product.getStockDisponible() != null &&
-                product.getStockDisponible().compareTo(BigDecimal.ZERO) > 0;
+                product.getStockDisponible() > 0;
     }
 
     default String getStockStatus(Product product) {
         if (product.getStockDisponible() == null ||
-                product.getStockDisponible().compareTo(BigDecimal.ZERO) == 0) {
+                product.getStockDisponible() == 0) {
             return "OUT_OF_STOCK";
-        } else if (product.getStockDisponible().compareTo(BigDecimal.TEN) < 0) {
+        } else if (product.getStockDisponible() < 0) {
             return "LOW_STOCK";
         } else {
             return "IN_STOCK";
