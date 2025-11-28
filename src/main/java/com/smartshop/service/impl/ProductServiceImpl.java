@@ -15,8 +15,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -35,7 +36,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = productMapper.toEntity(dto);
 
         if (product.getStockDisponible() == null) {
-            product.setStockDisponible(BigDecimal.ZERO);
+            product.setStockDisponible(0);
         }
 
         Product savedProduct = productRepository.save(product);
@@ -81,6 +82,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public Page<ProductResponseDTO> getProductsDeleted(Boolean deleted,Pageable pageable) {
+        Page<Product> products = productRepository.findByDeleted(deleted,pageable);
+        return products.map(productMapper::toResponseDTO);
+    }
+
+    @Override
     public ProductAdvancedResponseDTO update(String id, UpdateProductDTO dto) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
@@ -108,7 +115,22 @@ public class ProductServiceImpl implements ProductService {
     public void delete(String id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
-        productRepository.delete(product);
+        product.setDeleted(true);
+        product.setDeletedAt(LocalDateTime.now());
+        productRepository.save(product);
+    }
+
+    @Override
+    public List<ProductResponseDTO> searchProducts(String keyword) {
+        List<Product> products = productRepository.searchByKeywordInAllFields(keyword);
+
+        if (products.isEmpty()) {
+            throw new ResourceNotFoundException("No products found for keyword: " + keyword);
+        }
+
+        return products.stream()
+                .map(productMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 }
 
