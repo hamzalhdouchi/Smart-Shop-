@@ -1,6 +1,6 @@
 package com.smartshop.controller;
 
-import com.smartshop.apiResponse.ApiResponseDTO;
+import com.smartshop.apiResponse.ApiResponse;
 import com.smartshop.dto.requist.createRequistDto.UserClientRegistrationDTO;
 import com.smartshop.dto.requist.updateRequistDto.ClientUpdateDTO;
 import com.smartshop.dto.response.client.ClientResponseDTO;
@@ -25,12 +25,12 @@ public class ClientController {
     private final HttpServletRequest request;
 
     @PostMapping
-    public ResponseEntity<ApiResponseDTO<ClientWithUserResponseDTO>> createClient(
+    public ResponseEntity<ApiResponse<ClientWithUserResponseDTO>> createClient(
             @Valid @RequestBody UserClientRegistrationDTO dto) {
 
         ClientWithUserResponseDTO client = clientService.create(dto);
 
-        ApiResponseDTO<ClientWithUserResponseDTO> response = ApiResponseDTO.success(
+        ApiResponse<ClientWithUserResponseDTO> response = ApiResponse.success(
                 client,
                 "Client created successfully"
         );
@@ -40,12 +40,12 @@ public class ClientController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponseDTO<ClientResponseDTO>> getClientById(
+    public ResponseEntity<ApiResponse<ClientResponseDTO>> getClientById(
             @PathVariable String id) {
 
         ClientResponseDTO client = clientService.getClientById(id);
 
-        ApiResponseDTO<ClientResponseDTO> response = ApiResponseDTO.success(
+        ApiResponse<ClientResponseDTO> response = ApiResponse.success(
                 client,
                 "Client retrieved successfully"
         );
@@ -55,12 +55,12 @@ public class ClientController {
     }
 
     @GetMapping("/{id}/with-user")
-    public ResponseEntity<ApiResponseDTO<ClientWithUserResponseDTO>> getClientWithUserById(
+    public ResponseEntity<ApiResponse<ClientWithUserResponseDTO>> getClientWithUserById(
             @PathVariable String id) {
 
         ClientWithUserResponseDTO client = clientService.getClientWithUserById(id);
 
-        ApiResponseDTO<ClientWithUserResponseDTO> response = ApiResponseDTO.success(
+        ApiResponse<ClientWithUserResponseDTO> response = ApiResponse.success(
                 client,
                 "Client with user details retrieved successfully"
         );
@@ -70,12 +70,12 @@ public class ClientController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponseDTO<Page<ClientResponseDTO>>> getAllClients(
+    public ResponseEntity<ApiResponse<Page<ClientResponseDTO>>> getAllClients(
             @PageableDefault(page = 0, size = 20, sort = "nom") Pageable pageable) {
 
         Page<ClientResponseDTO> clients = clientService.getAllClients(pageable);
 
-        ApiResponseDTO<Page<ClientResponseDTO>> response = ApiResponseDTO.success(
+        ApiResponse<Page<ClientResponseDTO>> response = ApiResponse.success(
                 clients,
                 "Clients retrieved successfully"
         );
@@ -85,12 +85,12 @@ public class ClientController {
     }
 
     @GetMapping("/with-user")
-    public ResponseEntity<ApiResponseDTO<Page<ClientWithUserResponseDTO>>> getAllClientsWithUser(
+    public ResponseEntity<ApiResponse<Page<ClientWithUserResponseDTO>>> getAllClientsWithUser(
             @PageableDefault(page = 0, size = 20, sort = "nom") Pageable pageable) {
 
         Page<ClientWithUserResponseDTO> clients = clientService.getAllClientsWithUser(pageable);
 
-        ApiResponseDTO<Page<ClientWithUserResponseDTO>> response = ApiResponseDTO.success(
+        ApiResponse<Page<ClientWithUserResponseDTO>> response = ApiResponse.success(
                 clients,
                 "Clients with user details retrieved successfully"
         );
@@ -100,13 +100,13 @@ public class ClientController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponseDTO<ClientWithUserResponseDTO>> updateClient(
+    public ResponseEntity<ApiResponse<ClientWithUserResponseDTO>> updateClient(
             @PathVariable String id,
             @Valid @RequestBody ClientUpdateDTO dto) {
 
         ClientWithUserResponseDTO client = clientService.update(id, dto);
 
-        ApiResponseDTO<ClientWithUserResponseDTO> response = ApiResponseDTO.success(
+        ApiResponse<ClientWithUserResponseDTO> response = ApiResponse.success(
                 client,
                 "Client updated successfully"
         );
@@ -117,23 +117,23 @@ public class ClientController {
 
     // DELETE
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponseDTO<Void>> deleteClient(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<Void>> deleteClient(@PathVariable String id) {
 
         clientService.delete(id);
 
-        ApiResponseDTO<Void> response = ApiResponseDTO.success("Client deleted successfully");
+        ApiResponse<Void> response = ApiResponse.success("Client deleted successfully");
         response.setPath(request.getRequestURI());
 
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}/change-Tair/{tair}")
-    public ResponseEntity<ApiResponseDTO<ClientResponseDTO>> changeTair(
+    public ResponseEntity<ApiResponse<ClientResponseDTO>> changeTair(
             @PathVariable String id,
             @PathVariable String tair){
 
         ClientResponseDTO client =  clientService.changeTair(id, tair);
-        ApiResponseDTO<ClientResponseDTO> response = ApiResponseDTO.success(
+        ApiResponse<ClientResponseDTO> response = ApiResponse.success(
                 client,
                 "Client  successfully"
         );
