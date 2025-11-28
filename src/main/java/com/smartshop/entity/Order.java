@@ -52,10 +52,12 @@ public class Order extends Auditable {
     @Column(name = "code_promo", length = 50)
     private String codePromo;
 
-    @Column(name = "remise_fidelite", precision = 5, scale = 2)
+    // Changé de precision = 5 à precision = 10
+    @Column(name = "remise_fidelite", precision = 10, scale = 2)
     private BigDecimal remiseFidelite = BigDecimal.ZERO;
 
-    @Column(name = "remise_promo", precision = 5, scale = 2)
+    // Changé de precision = 5 à precision = 10
+    @Column(name = "remise_promo", precision = 10, scale = 2)
     private BigDecimal remisePromo = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
