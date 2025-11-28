@@ -4,11 +4,13 @@ package com.smartshop.entity;
 import com.smartshop.audit.Auditable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+@Builder
 @Entity
 @Table(name = "products")
 @Data
@@ -28,6 +30,13 @@ public class Product extends Auditable {
     private BigDecimal prix_unitair;
 
     @Column(name = "stock")
-    private BigDecimal stockDisponible;
+    private Integer stockDisponible;
+
+    @Column(name = "deleted", nullable = false)
+    @Builder.Default
+    private Boolean deleted = false;
+
+    @Column(name = "deleted_at")
+    private java.time.LocalDateTime deletedAt;
 
 }
