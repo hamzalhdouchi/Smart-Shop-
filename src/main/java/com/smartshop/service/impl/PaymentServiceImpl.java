@@ -61,7 +61,6 @@ public class PaymentServiceImpl implements PaymentService {
 
 
     @Override
-    @Transactional(readOnly = true)
     public PaymentResponseDTO getPaymentById(String paymentId) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("No payment found with ID: " + paymentId));
@@ -69,7 +68,6 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public PaymentAdvancedResponseDTO getPaymentByIdAdvanced(String paymentId) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("No payment found with ID: " + paymentId));
@@ -77,14 +75,12 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<PaymentResponseDTO> getPaymentsByOrder(String orderId) {
         List<Payment> payments = paymentRepository.findByOrderId(orderId);
         return paymentMapper.toSimpleDTOList(payments);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<PaymentResponseDTO> getAllPayments(Pageable pageable) {
         return paymentRepository.findAll(pageable).map(paymentMapper::toSimpleDTO);
     }
