@@ -3,6 +3,7 @@ package com.smartshop.service.impl;
 import com.smartshop.dto.requist.createRequistDto.UserClientRegistrationDTO;
 import com.smartshop.dto.requist.updateRequistDto.ClientUpdateDTO;
 import com.smartshop.dto.response.client.ClientResponseDTO;
+import com.smartshop.dto.response.client.ClientStatisticsDTO;
 import com.smartshop.dto.response.client.ClientWithUserResponseDTO;
 import com.smartshop.entity.Client;
 import com.smartshop.entity.User;
@@ -21,6 +22,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 
 @Service
@@ -146,6 +150,27 @@ public class ClientServiceImpl implements ClientService {
         client.setTier(clientTier);
         Client updatedClient = clientRepository.save(client);
         return clientMapper.toClientResponse(updatedClient);
+    }
+
+    @Override
+    public ClientStatisticsDTO getClientStatistics(String clientId) {
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Client not found with id: " + clientId));
+
+        BigDecimal averageOrderValue = BigDecimal.ZERO;
+        if (client.getTotalOrders() > 0) {
+            averageOrderValue = client.getTotalSpent()
+                    .divide(new BigDecimal(client.getTotalOrders()), 2, RoundingMode.HALF_UP);
+        }
+
+        return ClientStatisticsDTO.builder()
+                .clientId(client.getId())
+                .nom(client.getNom())
+                .email(client.getEmail())
+                .tier(client.getTier())
+                .totalOrders(client.getTotalOrders())
+                .totalSpent(client.getTotalSpent())
+                .build();
     }
 }
 
