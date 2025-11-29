@@ -4,6 +4,7 @@ import com.smartshop.apiResponse.ApiResponse;
 import com.smartshop.dto.requist.createRequistDto.UserClientRegistrationDTO;
 import com.smartshop.dto.requist.updateRequistDto.ClientUpdateDTO;
 import com.smartshop.dto.response.client.ClientResponseDTO;
+import com.smartshop.dto.response.client.ClientStatisticsDTO;
 import com.smartshop.dto.response.client.ClientWithUserResponseDTO;
 import com.smartshop.service.ClientService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -140,6 +141,14 @@ public class ClientController {
         response.setPath(request.getRequestURI());
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{clientId}/statistics")
+    public ResponseEntity<ApiResponse<ClientStatisticsDTO>> getClientStatistics(
+            @PathVariable String clientId
+    ) {
+        ClientStatisticsDTO stats = clientService.getClientStatistics(clientId);
+        return ResponseEntity.ok(ApiResponse.success(stats, "Client statistics retrieved successfully"));
     }
 
 }
