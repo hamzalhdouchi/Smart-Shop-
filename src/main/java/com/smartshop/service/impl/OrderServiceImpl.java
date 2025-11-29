@@ -2,6 +2,7 @@ package com.smartshop.service.impl;
 
 import com.smartshop.dto.requist.createRequistDto.OrderCreateDTO;
 import com.smartshop.dto.requist.updateRequistDto.OrderUpdateDTO;
+import com.smartshop.dto.response.client.ClientStatisticsDTO;
 import com.smartshop.dto.response.order.OrderAdvancedResponseDTO;
 import com.smartshop.dto.response.order.OrderResponseDTO;
 import com.smartshop.dto.response.order.OrderStatisticsDTO;
@@ -42,11 +43,9 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderResponseDTO createOrder(OrderCreateDTO dto) {
 
-        // 1. Récupérer le client
         Client client = clientRepository.findById(dto.getClientId())
                 .orElseThrow(() -> new ResourceNotFoundException("No client found with ID: " + dto.getClientId()));
 
-        // 2. Vérifier et récupérer le code promo si existant
         BigDecimal promoPercentage = BigDecimal.ZERO;
         PromoCode promoCode = null;
 
@@ -61,7 +60,6 @@ public class OrderServiceImpl implements OrderService {
             promoPercentage = promoCode.getRemisePourcentage();
         }
 
-        // 3. Créer l'order
         Order order = Order.builder()
                 .client(client)
                 .statut(OrderStatus.PENDING)
@@ -73,7 +71,6 @@ public class OrderServiceImpl implements OrderService {
                 .paiements(new ArrayList<>())
                 .build();
 
-        // 4. Créer les items et calculer le sous-total
         BigDecimal subTotal = BigDecimal.ZERO;
         List<OrderItem> orderItems = new ArrayList<>();
 
@@ -81,20 +78,17 @@ public class OrderServiceImpl implements OrderService {
             Product product = productRepository.findById(itemDTO.getProduitId())
                     .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + itemDTO.getProduitId()));
 
-            // Vérifier le stock
             if (itemDTO.getQuantite() > product.getStockDisponible()) {
                 throw new BusinessException("Insufficient stock for product: " + product.getNom() +
                         ". Available: " + product.getStockDisponible() + ", Requested: " + itemDTO.getQuantite());
             }
 
-            // Calculer le total de la ligne
             BigDecimal lineTotal = product.getPrix_unitair()
                     .multiply(new BigDecimal(itemDTO.getQuantite()))
                     .setScale(2, RoundingMode.HALF_UP);
 
             subTotal = subTotal.add(lineTotal);
 
-            // Créer OrderItem avec clé composite
             OrderItemId orderItemId = new OrderItemId(null, itemDTO.getProduitId());
 
             OrderItem orderItem = OrderItem.builder()
@@ -112,11 +106,9 @@ public class OrderServiceImpl implements OrderService {
         order.setItems(orderItems);
         order.setSousTotalHT(subTotal);
 
-        // 5. Calculer la remise fidélité
         BigDecimal loyaltyDiscount = calculateLoyaltyDiscount(client, subTotal);
         order.setRemiseFidelite(loyaltyDiscount);
 
-        // 6. Calculer la remise promo
         BigDecimal promoDiscount = BigDecimal.ZERO;
         if (promoPercentage.compareTo(BigDecimal.ZERO) > 0) {
             promoDiscount = subTotal.multiply(promoPercentage.divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP))
@@ -125,34 +117,28 @@ public class OrderServiceImpl implements OrderService {
             order.setCodePromo(dto.getCodePromo());
         }
 
-        // 7. Calculer le montant total des remises
         BigDecimal totalDiscount = loyaltyDiscount.add(promoDiscount);
         order.setMontantRemise(totalDiscount);
 
-        // 8. Calculer le montant HT après remise
         BigDecimal montantHTApresRemise = subTotal.subtract(totalDiscount).setScale(2, RoundingMode.HALF_UP);
         order.setMontantHTApresRemise(montantHTApresRemise);
 
-        // 9. Calculer la TVA (20%)
         BigDecimal montantTVA = montantHTApresRemise
                 .multiply(order.getTauxTVA().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP))
                 .setScale(2, RoundingMode.HALF_UP);
         order.setMontantTVA(montantTVA);
 
-        // 10. Calculer le total TTC
         BigDecimal totalTTC = montantHTApresRemise.add(montantTVA).setScale(2, RoundingMode.HALF_UP);
         order.setTotalTTC(totalTTC);
 
-        // 11. Montant restant = total TTC (pas encore payé)
         order.setMontantRestant(totalTTC);
 
-        // 12. Sauvegarder la commande
+
+
         Order savedOrder = orderRepository.save(order);
 
-        // 13. Décrémenter le stock
         decrementStock(savedOrder);
 
-        // 14. Marquer le code promo comme utilisé si applicable
         if (promoCode != null) {
             promoCode.setDisponible(false);
             promoCodeRepository.save(promoCode);
@@ -167,12 +153,10 @@ public class OrderServiceImpl implements OrderService {
         for (OrderItem item : order.getItems()) {
             Product product = item.getProduit();
 
-            // Vérifier le stock
             if (product.getStockDisponible() < item.getQuantite()) {
                 throw new BusinessException("Stock changed! Insufficient stock for: " + product.getNom());
             }
 
-            // Décrémenter le stock
             Integer newStock = product.getStockDisponible() - item.getQuantite();
             product.setStockDisponible(newStock);
             productRepository.save(product);
@@ -180,11 +164,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public BigDecimal calculateLoyaltyDiscount(Client client, BigDecimal subTotal) {
         ClientTier tier = client.getTier();
-        BigDecimal discountPercentage = BigDecimal.ZERO;
-        BigDecimal minimumAmount = BigDecimal.ZERO;
+        BigDecimal discountPercentage;
+        BigDecimal minimumAmount;
 
         switch (tier) {
             case SILVER:
@@ -204,7 +187,6 @@ public class OrderServiceImpl implements OrderService {
                 return BigDecimal.ZERO;
         }
 
-        // Appliquer la remise seulement si le sous-total dépasse le minimum
         if (subTotal.compareTo(minimumAmount) >= 0) {
             return subTotal.multiply(discountPercentage.divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP))
                     .setScale(2, RoundingMode.HALF_UP);
@@ -214,7 +196,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public OrderResponseDTO getOrderById(String orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("No order found with ID: " + orderId));
@@ -222,7 +203,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public OrderAdvancedResponseDTO getOrderByIdAdvanced(String orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("No order found with ID: " + orderId));
@@ -230,14 +210,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<OrderResponseDTO> getOrdersByClient(String clientId) {
         List<Order> orders = orderRepository.findAllByClientId(clientId);
         return orderMapper.toSimpleDTOList(orders);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<OrderResponseDTO> getAllOrders(Pageable pageable) {
         return orderRepository.findAll(pageable).map(orderMapper::toSimpleDTO);
     }
@@ -252,7 +230,6 @@ public class OrderServiceImpl implements OrderService {
             throw new BusinessException("Cannot confirm order, it is not fully paid. Remaining: " + order.getMontantRestant());
         }
 
-        // Vérifier que la commande est en statut PENDING
         if (!order.getStatut().equals(OrderStatus.PENDING)) {
             throw new BusinessException("Order cannot be confirmed. Current status: " + order.getStatut());
         }
@@ -262,7 +239,6 @@ public class OrderServiceImpl implements OrderService {
 
         Order confirmedOrder = orderRepository.save(order);
 
-        // Mettre à jour les statistiques du client
         updateClientStatistics(confirmedOrder);
 
         return orderMapper.toSimpleDTO(confirmedOrder);
@@ -281,7 +257,6 @@ public class OrderServiceImpl implements OrderService {
         order.setStatut(OrderStatus.CANCELED);
         order.setDateAnnulation(LocalDateTime.now());
 
-        // Restaurer le stock
         restoreStock(order);
 
         Order cancelledOrder = orderRepository.save(order);
@@ -309,8 +284,6 @@ public class OrderServiceImpl implements OrderService {
             throw new BusinessException("Only PENDING orders can be updated");
         }
 
-        // Logique de mise à jour (code promo, items, etc.)
-        // À implémenter selon besoins
 
         Order updatedOrder = orderRepository.save(order);
         return orderMapper.toSimpleDTO(updatedOrder);
@@ -328,15 +301,9 @@ public class OrderServiceImpl implements OrderService {
     private void updateClientStatistics(Order order) {
         Client client = order.getClient();
 
-        // Incrémenter le nombre de commandes
         client.setTotalOrders(client.getTotalOrders() + 1);
-
-        // Ajouter au montant cumulé
         client.setTotalSpent(client.getTotalSpent().add(order.getTotalTTC()));
-
-        // Recalculer le niveau de fidélité
         updateClientTier(client);
-
         clientRepository.save(client);
     }
 
@@ -367,6 +334,5 @@ public class OrderServiceImpl implements OrderService {
                 .lastUpdated(LocalDateTime.now())
                 .build();
     }
-
 
 }
