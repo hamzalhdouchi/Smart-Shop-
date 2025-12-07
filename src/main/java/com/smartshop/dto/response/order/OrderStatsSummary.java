@@ -1,4 +1,4 @@
-package com.smartshop.entity;
+package com.smartshop.dto.response.order;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

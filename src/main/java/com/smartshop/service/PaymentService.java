@@ -22,7 +22,5 @@ public interface PaymentService {
     Page<PaymentResponseDTO> getAllPayments(Pageable pageable);
 
     PaymentResponseDTO updatePaymentStatus(String paymentId, PaymentStatus status);
-
-    void deletePayment(String paymentId);
 }
 

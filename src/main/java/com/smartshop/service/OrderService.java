@@ -2,7 +2,6 @@ package com.smartshop.service;
 
 import com.smartshop.dto.requist.createRequistDto.OrderCreateDTO;
 import com.smartshop.dto.requist.updateRequistDto.OrderUpdateDTO;
-import com.smartshop.dto.response.client.ClientStatisticsDTO;
 import com.smartshop.dto.response.order.OrderAdvancedResponseDTO;
 import com.smartshop.dto.response.order.OrderResponseDTO;
 import com.smartshop.dto.response.order.OrderStatisticsDTO;

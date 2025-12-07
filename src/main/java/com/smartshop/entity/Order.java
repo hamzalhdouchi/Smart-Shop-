@@ -11,7 +11,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "commandes")
-@Data
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -52,11 +52,9 @@ public class Order extends Auditable {
     @Column(name = "code_promo", length = 50)
     private String codePromo;
 
-    // Changé de precision = 5 à precision = 10
     @Column(name = "remise_fidelite", precision = 10, scale = 2)
     private BigDecimal remiseFidelite = BigDecimal.ZERO;
 
-    // Changé de precision = 5 à precision = 10
     @Column(name = "remise_promo", precision = 10, scale = 2)
     private BigDecimal remisePromo = BigDecimal.ZERO;
 

@@ -10,7 +10,6 @@ import org.mapstruct.*;
 
 import java.util.List;
 
-//@Mapper(componentModel = "spring", uses = {OrderItemMapper.class, ClientMapper.class, PaymentMapper.class})
 @Mapper(
         componentModel = "spring",
         injectionStrategy = InjectionStrategy.CONSTRUCTOR,

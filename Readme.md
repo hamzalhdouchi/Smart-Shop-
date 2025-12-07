@@ -213,5 +213,7 @@ Le projet suit une architecture en couches pour assurer une séparation claire d
 - Codes HTTP cohérents (400, 401, 403, 404, 422, 500)
 - Réponses JSON standardisées avec timestamp, message, et path
 
-### Diagramme de flux
+### Diagramme de Class
+
+![img.png](img.png)
 

@@ -1,11 +1,9 @@
 package com.smartshop.mapper;
 
 import com.smartshop.dto.requist.createRequistDto.PaymentCreateDTO;
-import com.smartshop.dto.response.order.OrderAdvancedResponseDTO;
 import com.smartshop.dto.response.payement.PaymentAdvancedResponseDTO;
 import com.smartshop.dto.response.payement.PaymentResponseDTO;
 import com.smartshop.entity.Order;
-import com.smartshop.entity.OrderItem;
 import com.smartshop.entity.Payment;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

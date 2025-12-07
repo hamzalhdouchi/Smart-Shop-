@@ -1,6 +1,5 @@
 package com.smartshop.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartshop.enums.UserRole;
 import com.smartshop.exception.ErrorResponse;
 import jakarta.servlet.*;
@@ -17,7 +16,6 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class AuthFilter implements Filter {
 
-    private final ObjectMapper objectMapper;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -79,7 +77,5 @@ public class AuthFilter implements Filter {
 
         response.setStatus(status);
         response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }

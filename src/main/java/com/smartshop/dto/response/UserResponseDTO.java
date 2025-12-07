@@ -1,6 +1,5 @@
 package com.smartshop.dto.response;
 
-import com.smartshop.entity.User;
 import com.smartshop.enums.UserRole;
 import lombok.Builder;
 import lombok.Data;

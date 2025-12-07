@@ -16,10 +16,9 @@ public class OrderStatisticsDTO {
     private Long totalConfirmedOrders;
     private BigDecimal totalConfirmedAmount;
     private LocalDateTime lastUpdated;
-
-    // Bonus : stats supplémentaires utiles
     private Long totalPendingOrders;
     private Long totalCancelledOrders;
     private BigDecimal averageOrderAmount;
+
 }
 

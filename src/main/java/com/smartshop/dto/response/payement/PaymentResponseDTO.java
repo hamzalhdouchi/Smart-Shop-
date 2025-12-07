@@ -22,5 +22,6 @@ public class PaymentResponseDTO {
     private LocalDate dateEcheance;
     private PaymentType typePayment;
     private PaymentStatus paymentStatus;
+
 }
 
